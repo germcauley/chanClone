@@ -20,13 +20,35 @@ def board(board):
 
 @app.route('/<board>/post', methods = ['POST'])
 def post(board):
-    filename = ''
-    if 'image' in request.files:
-        upload_image(request.files['image'])
-    now = datetime.datetime.now()
-    post = (request.form.get('name'),now.isoformat(),board,request.form.get('post_text'),filename)
-    print(create_post(post))
-    return 'yay'
+    newfilename=''
+    if request.form.get('post_text'):
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and allowed_file(file.filename):
+                print('file good')
+                filename = secure_filename(file.filename)
+                newfilename = str(random.randint(10000000,100000000))+'.'+filename.rsplit('.', 1)[1].lower()
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], newfilename))
+        now = datetime.datetime.now()
+        post = (newfilename,request.form.get('name'),now.isoformat(),board,request.form.get('post_text'))
+        print(create_new_post(post,'0'))
+    return 'posted'
+
+@app.route('/<board>/post_reply/<post_id>', methods = ['POST'])
+def post_reply(board,post_id):
+    newfilename=''
+    if request.form.get('post_text'):
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and allowed_file(file.filename):
+                print('file good')
+                filename = secure_filename(file.filename)
+                newfilename = str(random.randint(10000000,100000000))+'.'+filename.rsplit('.', 1)[1].lower()
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], newfilename))
+        now = datetime.datetime.now()
+        post = (newfilename,request.form.get('name'),now.isoformat(),board,request.form.get('post_text'),post_id)
+        print(create_new_post(post,post_id))
+    return 'posted'
 
 def get_db():
     db = getattr(g, '_database', None)
@@ -41,8 +63,11 @@ def query_db(query, args=(), one=False):
     cur.close()
     return (rv[0] if rv else None) if one else rv
 
-def create_post(request):
-    query = ''' INSERT INTO posts(user, date, board, post_text,image_file) values (?,?,?,?,?) '''
+def create_new_post(request, reply_id):
+    # if reply_id == 0:
+    query = ''' INSERT INTO posts(image_file, user, date, board, post_text) values (?,?,?,?,?) '''
+    # else:
+    #     query = ''' INSERT INTO replies(image_file, user, date, board, post_text, replying_to) values (?,?,?,?,?,?) '''
     cur = get_db().cursor()
     cur.execute(query, request)
     get_db().commit()
@@ -51,16 +76,19 @@ def create_post(request):
 
 def allowed_file(filename):
     return'.' in filename and \
-    filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
+        filename.rsplit('.',1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 def upload_image(image):
-    filename=''
     if image and allowed_file(image.filename):
         print('image good')
         filename = secure_filename(image.filename)
         newfilename = str(random.randint(10000,100000))+'.'+filename.rsplit('.',1)[1].lower()
         image.save(os.path.join(app.config['UPLOAD_FOLDER'],newfilename))
-    return newfilename
+        print(newfilename)
+        return newfilename
+
+
+
 if __name__ == '__main__':
     app.run()
