@@ -2,6 +2,14 @@
 
 <html>
 <head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+          integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js"
+            integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6"
+            crossorigin="anonymous"></script>
+    <link href="/static/css/style.css" rel="stylesheet">
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
     <meta charset="UTF-8">
     <meta name="viewport"
           content="width=device-width, user-scalable=no, initial-scale=1.0, maximum-scale=1.0, minimum-scale=1.0">
@@ -9,13 +17,23 @@
     <title>eirechan</title>
 </head>
 <body>
-    <h1>This is the homepage!!!</h1>
-<ul>
-    {% for board in boards %}
-    <li>
-        <a href="/{{ board[1] }}">{{ board[1]}} - {{ board[2] }}</a>
-    </li>
-    {%  endfor %}
-</ul>
+
+
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark ">
+   <a class="navbar-brand" href="#">
+        <img src="static/images/logo.png" width="30" height="30" alt="">
+       ÉireChan
+    </a>
+  <div class="collapse navbar-collapse" id="navbarNavAltMarkup">
+    <div class="navbar-nav">
+         {% for board in boards %}
+        <a class="nav-item nav-link" href="/{{ board[1] }}">{{ board[1]}} - {{ board[2] }}</a>
+        {% endfor %}
+    </div>
+  </div>
+</nav>
+
+
 </body>
 </html>
