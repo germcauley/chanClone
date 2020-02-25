@@ -1,4 +1,4 @@
-from flask import Flask, request, render_template, g
+from flask import Flask,redirect, request, render_template, g
 from werkzeug.utils import secure_filename
 import sqlite3, datetime, os, random
 
@@ -8,19 +8,19 @@ ALLOWED_EXTENSIONS = set(['png', 'jpg', 'jpeg', 'gif'])
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
-#homepage
+
 @app.route('/')
 def index():
     boards = query_db('select * from boards')
     return render_template('homepage.html', boards=boards)
 
-#board
+
 @app.route('/<board>')
 def board(board):
     posts = query_db('select * from posts where board = "{}"'.format(board))
     return render_template('board.html', posts=posts, board=board)
 
-#create post
+
 @app.route('/<board>/post', methods=['POST'])
 def post(board):
     newfilename = ''
@@ -34,12 +34,8 @@ def post(board):
                 file.save(os.path.join(app.config['UPLOAD_FOLDER'], newfilename))
         now = datetime.datetime.now()
         post = (newfilename, request.form.get('name'), now.isoformat(), board, request.form.get('post_text'))
-        # print(create_new_post(post, '0'))
-    return 'posted'
-
-#delete post, add user validation eventually
-# @app.route(board, post_id, methods=['POST']):
-# def delete_post(board, post_id)
+        print(create_new_post(post, '0'))
+    return redirect('/')
 
 
 @app.route('/<board>/post_reply/<post_id>', methods=['POST'])
@@ -64,7 +60,6 @@ def reply(board, post_id):
     print(replies)
     return render_template('reply.html',post=post[0],replies=replies,board=board)
 
-
 def get_db():
     db = getattr(g, '_database', None)
     if db is None:
@@ -80,10 +75,10 @@ def query_db(query, args=(), one=False):
 
 
 def create_new_post(request, reply_id):
-    if reply_id == 0:
-        query = ''' INSERT INTO posts(image_file, user, date, board, post_text) values (?,?,?,?,?)'''
-    else:
-        query = ''' INSERT INTO replies(image_file, user, date, board, post_text, replying_to) values (?,?,?,?,?,?) '''
+    # if reply_id == 1:
+    query = ''' INSERT INTO posts(image_file, user, date, board, post_text) values (?,?,?,?,?) '''
+    # else:
+    #     query = ''' INSERT INTO replies(image_file, user, date, board, post_text, replying_to) values (?,?,?,?,?,?) '''
     cur = get_db().cursor()
     cur.execute(query, request)
     get_db().commit()
